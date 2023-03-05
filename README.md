@@ -118,8 +118,7 @@ LEFT JOIN `bigquery-public-data.google_analytics_sample.ga_sessions_*` as c
   AND a.fullVisitorId = c.fullVisitorId;
 ```
 
-We need a dataset on the grain of session for all sessions which have added a product to cart.
-Since the model's target variable will be whether or not the session converts to a purchase we will include boolean of had_purchase.
+We need a dataset on the grain of session for all sessions which have added a product to cart. We will use the full timerange of data available in order to have a larger training set for the model. Since the model's target variable will be whether or not the session converts to a purchase we will include boolean of had_purchase.
 The features I've chosen for this model can be broken down into the following categories:
 - **Features measuring engagement**: (number of add to cart events, distinct products viewed, time elapsed since session start to first add to cart, total time on site, total page views, visit number, session quality, social engagement). These features indicate how involved the user was with the site. Someone who spends more time engaging could potentially be more likely to purchase.
 - **Features measuring intention**: (is true direct, source medium) These features may indicate how serious/intent a user is in making a purchase. For example, if the user is specifically searching for the product they may be more likely to convert than a user who indirectly landed there due to an add.
