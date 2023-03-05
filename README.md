@@ -34,7 +34,7 @@ AND hits.eventInfo.eventAction IN ('Quickview Click', 'Product Click', 'Promotio
 GROUP BY 1
 ORDER BY 2 DESC;
 ```
-Using crossjoin on UNNEST(hits) and UNNEST(hits.product) in order to get one row per product hit, filtering the result set to be of type and actions of interest. Returning the categories in order of having the greatest number of unique users
+Using crossjoin on UNNEST(hits) and UNNEST(hits.product) in order to get one row per product hit, filtering the result set to be of type and actions of interest. Returning the categories in order of having the greatest number of unique users.
 
 ![plot](./img/question-2.png)
 
