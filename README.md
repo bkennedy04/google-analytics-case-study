@@ -100,7 +100,7 @@ SELECT
     ,c.totals.sessionQualityDim
     ,c.totals.timeOnSite
     ,c.totals.pageviews
-  	-- intention features
+    -- intention features
     ,c.trafficSource.isTrueDirect
     ,c.trafficSource.medium
     ,c.device.deviceCategory
