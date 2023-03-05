@@ -99,12 +99,12 @@ SELECT
     ,c.totals.sessionQualityDim
     ,c.totals.timeOnSite
     ,c.totals.pageviews
+    ,c.socialEngagementType
     -- intention features
     ,c.trafficSource.isTrueDirect
     ,c.trafficSource.medium
     ,c.device.deviceCategory
     -- customer information
-    ,c.socialEngagementType
     ,c.geoNetwork.country = 'United States' as is_domestic
     -- historical
     ,b.has_purchased_before
@@ -119,9 +119,11 @@ LEFT JOIN `bigquery-public-data.google_analytics_sample.ga_sessions_*` as c
 ```
 
 We need a dataset on the grain of session for all sessions which have added a product to cart.
-Since the model's target variable will be wether or not the session converts to a purchase we will include boolean of had_purchase.
+Since the model's target variable will be whether or not the session converts to a purchase we will include boolean of had_purchase.
 The features I've chosen for this model can be broken down into the following categories:
-- **Features measuring engagement**: (number of add to cart events, distinct products viewed, time elapsed since session start to first add to cart, total time on site, total page views, visit number, session quality). These features indicate how involved the user was with the site. Someone who spends more time engaging could potentially be more likely to purchase.
+- **Features measuring engagement**: (number of add to cart events, distinct products viewed, time elapsed since session start to first add to cart, total time on site, total page views, visit number, session quality, social engagement). These features indicate how involved the user was with the site. Someone who spends more time engaging could potentially be more likely to purchase.
 - **Features measuring intention**: (is true direct, source medium) These features may indicate how serious/intent a user is in making a purchase. For example, if the user is specifically searching for the product they may be more likely to convert than a user who indirectly landed there due to an add.
-- **Customer information**
-- **Historical behavior**
+- **Customer information**: (is domestic) Assuming that the company is based in the US, a user's geographical location could determine how likely they are to go through with a purchase. For example, if the user is not domestic there could be additional fees such as higher shipping, taxes, tarrifs, longer lead time, etc. which could result in a user being less likely to go through with a purchase.
+- **Historical behavior** (has purchased before, time since last session) A user's historical behavior may be a good indicator of if they will complete a purchase. For example, if the user has purchased before they may be more likely to purchase again. Also the recency of a user's last session could show that the user has contemplated and is now ready to complete a purchase.
+
+The features above are just a sample of features which could be relevant. Additional features that could be considered given more time would be examining site performance (did the user run into high latency or any errors?), traversal of events (did the user keep visiting particular pages or go through a particular user flow which could indicate purchase likelihood?), was there a promotion at the time of the session?, along with any other datasources we may have around the user.
