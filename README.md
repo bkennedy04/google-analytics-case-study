@@ -34,10 +34,12 @@ AND hits.eventInfo.eventAction IN ('Quickview Click', 'Product Click', 'Promotio
 GROUP BY 1
 ORDER BY 2 DESC;
 ```
+Using crossjoin on UNNEST(hits) and UNNEST(hits.product) in order to get one row per product hit, filtering the result set to be of type and actions of interest. Returning the categories in order of having the greatest number of unique users
 
 ![plot](./img/question-2.png)
 
 ## Question 3
+Let's suppose that we ultimately want to build a model that predicts if a session that contains an “Add to Cart” action/event will be abandoned or conclude in a successful purchase. Again, we want to use hits.eventInfo.eventAction to find “Add to Cart” actions. Assuming that a session with least one transaction (indicated by totals.transactions > 0) means the session had a purchase, write a query that summarizes the number of sessions with cart additions broken out by those with and without purchases.
 
 ```sql
 SELECT 
@@ -48,10 +50,12 @@ FROM `bigquery-public-data.google_analytics_sample.ga_sessions_20170801`
 WHERE hits.eventInfo.eventAction = 'Add to Cart'
 GROUP BY 1;
 ```
+Filtering to "Add to Cart" actions and grouping by boolean defined by whether or not there was a purchase.
 
 ![plot](./img/question-3.png)
 
 ## Question 4
+Now, knowing how to determine sessions with purchases vs. sessions with abandoned carts, let's wrap this up by building a data set that we think contains useful features for a model that predicts if a session will ultimately end up with an abandoned cart or a successful purchase. In this case, feel free to explore the data and add any data you think might be meaningful. You should expand your final data set to pull from bigquery-public-data.google_analytics_sample.ga_sessions*, giving you more data to work with. Please provide a brief write up of the additional columns/features you've chosen and why you think they matter.
 
 ```sql
 WITH SESSIONS_OF_INTEREST AS (
@@ -95,7 +99,7 @@ SELECT
     ,c.totals.sessionQualityDim
     ,c.totals.timeOnSite
     ,c.totals.pageviews
-  	-- intention features
+    -- intention features
     ,c.trafficSource.isTrueDirect
     ,c.trafficSource.medium
     ,c.device.deviceCategory
@@ -105,7 +109,6 @@ SELECT
     -- historical
     ,b.has_purchased_before
     ,c.visitStartTime - b.last_session_start_time as time_since_last_session
-
 FROM SESSIONS_OF_INTEREST as a
 LEFT JOIN HISTORICAL_USER_FEATURES as b
   ON a.fullVisitorId = b.fullVisitorId
@@ -114,3 +117,11 @@ LEFT JOIN `bigquery-public-data.google_analytics_sample.ga_sessions_*` as c
   ON a.visitId = c.visitId
   AND a.fullVisitorId = c.fullVisitorId;
 ```
+
+We need a dataset on the grain of session for all sessions which have added a product to cart.
+Since the model's target variable will be wether or not the session converts to a purchase we will include boolean of had_purchase.
+The features I've chosen for this model can be broken down into the following categories:
+- **Features measuring engagement**: (number of add to cart events, distinct products viewed, time elapsed since session start to first add to cart, total time on site, total page views, visit number, session quality). These features indicate how involved the user was with the site. Someone who spends more time engaging could potentially be more likely to purchase.
+- **Features measuring intention**: (is true direct, source medium) These features may indicate how serious/intent a user is in making a purchase. For example, if the user is specifically searching for the product they may be more likely to convert than a user who indirectly landed there due to an add.
+- **Customer information**
+- **Historical behavior**
