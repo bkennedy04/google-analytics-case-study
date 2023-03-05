@@ -77,6 +77,7 @@ WITH SESSIONS_OF_INTEREST AS (
 HISTORICAL_USER_FEATURES AS (
   SELECT
     a.fullVisitorId
+    ,a.visitId
     ,COALESCE(MAX(b.totals.transactions), 0) as has_purchased_before
     ,MAX(b.visitStartTime) as last_session_start_time
   FROM SESSIONS_OF_INTEREST as a
@@ -84,7 +85,7 @@ HISTORICAL_USER_FEATURES AS (
     ON a.fullVisitorId = b.fullVisitorId
     -- ensure we are not including 'future' data
     AND a.visitNumber > COALESCE(b.visitNumber,1)
-  GROUP BY 1
+  GROUP BY 1,2
 )
 
 SELECT
@@ -99,19 +100,21 @@ SELECT
     ,c.totals.sessionQualityDim
     ,c.totals.timeOnSite
     ,c.totals.pageviews
-    ,c.socialEngagementType
-    -- intention features
+  	-- intention features
     ,c.trafficSource.isTrueDirect
     ,c.trafficSource.medium
     ,c.device.deviceCategory
     -- customer information
+    ,c.socialEngagementType
     ,c.geoNetwork.country = 'United States' as is_domestic
     -- historical
     ,b.has_purchased_before
     ,c.visitStartTime - b.last_session_start_time as time_since_last_session
+
 FROM SESSIONS_OF_INTEREST as a
 LEFT JOIN HISTORICAL_USER_FEATURES as b
   ON a.fullVisitorId = b.fullVisitorId
+  AND a.visitId = b.visitId
 -- total features
 LEFT JOIN `bigquery-public-data.google_analytics_sample.ga_sessions_*` as c
   ON a.visitId = c.visitId
